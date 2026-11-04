@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0f1923">
+  <title>Valorant Shop Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="backdrop" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"></span>
+      <span class="brand-name">Shop Check</span>
+    </div>
+    <div class="account" id="account" hidden>
+      <span class="chip" id="account-chip">
+        <span class="dot" id="saved-dot" hidden title="Stays logged in on this device"></span>
+        <span id="account-name"></span>
+      </span>
+      <button type="button" class="icon-button" id="refresh" aria-label="Refresh store" title="Refresh">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="text-button" id="logout">Log out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Login: one step on screen at a time. -->
+    <section class="login" id="login">
+      <p class="kicker">Valorant store</p>
+      <h1 class="hero">Your shop,<br>anywhere.</h1>
+      <p class="lede">Daily offers, accessories and the Night Market, checked from any device.</p>
+
+      <div class="wizard" id="wizard" data-step="1">
+        <ol class="progress" aria-label="Steps">
+          <li data-for="1"><span>1</span>Log in</li>
+          <li data-for="2"><span>2</span>Paste link</li>
+        </ol>
+
+        <div class="step" data-step="1">
+          <a class="cta" id="riot-login" target="_blank" rel="noopener noreferrer">
+            <span>Log in with Riot</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <p class="sub">
+            Opens Riot's own login page in a new tab. Your password only goes to Riot.
+          </p>
+          <p class="sub small">
+            Not your account? <a id="switch-account" target="_blank" rel="noopener noreferrer">Use a different one</a>
+            <span class="sep">·</span>
+            <button type="button" class="link" id="have-link">I already have the link</button>
+          </p>
+        </div>
+
+        <div class="step" data-step="2">
+          <p class="instruction">Riot sends you to a page that <strong>won't load</strong>. That's expected. Copy its address and paste it here.</p>
+
+          <div class="urlbar" aria-hidden="true">
+            <span class="lock"></span>
+            <span class="url"><span class="sel">localhost/redirect#access_token=eyJr…</span></span>
+          </div>
+
+          <form id="paste-form" class="paste" autocomplete="off">
+            <input id="paste" type="text" inputmode="url" spellcheck="false" placeholder="Paste the address here" aria-label="Redirect address">
+            <button type="button" class="paste-button" id="paste-clipboard">Paste</button>
+          </form>
+
+          <p class="sub small">
+            <button type="button" class="link" id="back">← Back</button>
+            <span class="sep">·</span>
+            <button type="button" class="link" id="phone-help-toggle" aria-expanded="false">Copying on a phone?</button>
+          </p>
+          <div class="phone-help" id="phone-help" hidden>
+            <p><strong>iPhone:</strong> tap the address bar, then tap and hold the address and choose Copy.</p>
+            <p><strong>Android:</strong> tap the address bar, then tap the copy icon under it.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-footer">
+        <label class="region">
+          <span>Region</span>
+          <select id="region">
+            <option value="auto">Auto</option>
+            <option value="na">North America</option>
+            <option value="latam">LATAM</option>
+            <option value="br">Brazil</option>
+            <option value="eu">Europe</option>
+            <option value="ap">Asia Pacific</option>
+            <option value="kr">Korea</option>
+          </select>
+        </label>
+        <button type="button" class="link strong" id="open-stay">Stay logged in on this device →</button>
+      </div>
+
+      <p class="fine">Not affiliated with Riot Games. Pasted logins are used once and never stored.</p>
+    </section>
+
+    <div id="store" hidden>
+      <section class="panel">
+        <header class="panel-head">
+          <h2>Daily offers</h2>
+          <span class="timer" data-timer="daily"></span>
+        </header>
+        <div class="grid grid-skins" id="daily"></div>
+      </section>
+
+      <section class="panel night" id="night-panel" hidden>
+        <header class="panel-head">
+          <h2>Night Market</h2>
+          <button type="button" class="text-button" id="reveal-all">Reveal all</button>
+          <span class="timer" data-timer="night"></span>
+        </header>
+        <div class="grid grid-skins" id="night"></div>
+      </section>
+
+      <section class="panel">
+        <header class="panel-head">
+          <h2>Accessories</h2>
+          <span class="timer" data-timer="accessories"></span>
+        </header>
+        <div class="grid grid-acc" id="accessories"></div>
+      </section>
+
+      <section class="panel" id="bundles-panel" hidden>
+        <header class="panel-head">
+          <h2>Featured</h2>
+        </header>
+        <div class="grid grid-bundles" id="bundles"></div>
+      </section>
+    </div>
+  </main>
+
+  <dialog class="sheet" id="stay-dialog" aria-labelledby="stay-title">
+    <form method="dialog" class="sheet-close-form">
+      <button class="icon-button close" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </form>
+    <p class="kicker">Optional</p>
+    <h2 id="stay-title">Stay logged in</h2>
+    <p class="sub">Save your Riot session cookie in this browser and your store opens instantly, for weeks at a time. Set it up once, on a computer.</p>
+
+    <ol class="howto">
+      <li>Log in with Riot and tick <strong>Stay signed in</strong> on Riot's page.</li>
+      <li>In Chrome, Opera or Edge, open <a id="riot-cookie-page" target="_blank" rel="noopener noreferrer">this Riot page</a>.</li>
+      <li>Press <kbd>⌘</kbd><kbd>⌥</kbd><kbd>I</kbd> (or <kbd>F12</kbd>) → <strong>Application</strong> → <strong>Cookies</strong> → <code>auth.riotgames.com</code>.</li>
+      <li>Copy the <strong>value</strong> of the <code>ssid</code> row and paste it below. Do the same on your phone to stay logged in there too.</li>
+    </ol>
+
+    <form id="ssid-form" class="paste" autocomplete="off">
+      <input id="ssid" type="password" spellcheck="false" placeholder="ssid cookie value" aria-label="ssid cookie value">
+      <button type="submit" class="paste-button" id="ssid-submit">Save</button>
+    </form>
+
+    <p class="warn">Treat it like a password: anyone with it is logged into your Riot account. It stays in this browser, and this site's server passes it to Riot without keeping it. Signing in to another account ends it.</p>
+    <p class="sub small">Still skipped past Riot's login? <a id="riot-logout" target="_blank" rel="noopener noreferrer">Sign out of Riot</a>, then log in again.</p>
+  </dialog>
+
+  <div class="toast" id="error" role="alert" hidden>
+    <span id="error-text"></span>
+    <button type="button" class="icon-button" id="error-close" aria-label="Dismiss">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</body>
+</html>

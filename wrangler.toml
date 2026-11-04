@@ -1,0 +1,5 @@
+# Deployed as a Cloudflare Pages project: public/ is served as static files and
+# functions/api/[[path]].js handles /api/*. Lives at https://valoshop.pages.dev
+name = "valoshop"
+pages_build_output_dir = "./public"
+compatibility_date = "2025-09-01"

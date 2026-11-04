@@ -1,0 +1,14 @@
+{
+  "name": "valorant-shop",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev",
+    "deploy": "wrangler pages deploy --branch main --commit-dirty=true",
+    "test": "node --test test/*.test.js",
+    "mock": "node test/mock-server.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
