@@ -544,12 +544,24 @@ function el(tag, className, content, children) {
   return node;
 }
 
+// Largest a small image may be drawn, relative to its real size. Gun buddies
+// and flexes only exist at 128px on valorant-api.com; stretched to fill a card
+// they turn to mush, so they stay near native size instead.
+const MAX_UPSCALE = 1.5;
+const LOWRES_PX = 256;
+
 function img(src, alt) {
   const node = document.createElement("img");
   node.src = src;
   node.alt = alt;
   node.loading = "lazy";
   node.decoding = "async";
+  node.addEventListener("load", () => {
+    if (node.naturalWidth > 0 && node.naturalWidth <= LOWRES_PX && node.closest(".art")) {
+      node.style.width = `${node.naturalWidth * MAX_UPSCALE}px`;
+      node.classList.add("lowres");
+    }
+  }, { once: true });
   return node;
 }
 
