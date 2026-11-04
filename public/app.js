@@ -58,6 +58,7 @@ let timers = {};         // section -> absolute end time (ms)
 let tick = null;
 let skinIndexPromise = null;
 const revealed = new Set(); // Night Market offers already flipped this visit
+let shownCount = 0;         // the "shops checked" number currently on screen
 
 // --- Startup -----------------------------------------------------------------
 
@@ -134,6 +135,8 @@ if (savedSsid) {
 
 // Warm the skin index while the user is off logging in.
 skinIndex().catch(() => {});
+
+loadCount();
 
 // --- Login guide -------------------------------------------------------------
 
@@ -273,6 +276,46 @@ async function render(store) {
   updateTimers();
   clearInterval(tick);
   tick = setInterval(updateTimers, 1000);
+
+  if (typeof store.shopsChecked === "number") {
+    $("shop-number").hidden = false;
+    showCount(store.shopsChecked);
+  }
+}
+
+// --- The global "shops checked" counter --------------------------------------
+
+async function loadCount() {
+  try {
+    const res = await fetch("/api/stats");
+    const { shopsChecked } = await res.json();
+    if (typeof shopsChecked === "number" && shopsChecked > 0) showCount(shopsChecked);
+  } catch {
+    // No counter is fine; it's decoration.
+  }
+}
+
+// Rolls every [data-count] number up from what it showed last.
+function showCount(n) {
+  $("counter").hidden = false;
+  const from = shownCount;
+  shownCount = Math.max(n, shownCount);
+  const nodes = document.querySelectorAll("[data-count]");
+  const paint = (value) => nodes.forEach((node) => { node.textContent = value.toLocaleString(); });
+
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || from === shownCount) {
+    paint(shownCount);
+    return;
+  }
+  const start = performance.now();
+  const duration = 1200;
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - (1 - t) ** 3;
+    paint(Math.round(from + (shownCount - from) * eased));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 function stagger(node, i) {

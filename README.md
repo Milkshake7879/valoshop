@@ -23,10 +23,12 @@ this one works. All of it is in this repo for you to check.
 - **What you paste is a one-hour login.** After you log in, Riot redirects to a
   `localhost` address that won't load. Its `#access_token=…` part is what you
   paste here. The token expires on Riot's side after about an hour.
-- **The server keeps nothing.** Riot's store servers can't be called from a
-  browser, so a small serverless function ([`src/worker.js`](src/worker.js))
-  makes the calls for you. It uses the token for a few requests to Riot and
-  returns your store. It has no database and logs nothing.
+- **The server keeps nothing about you.** Riot's store servers can't be called
+  from a browser, so a small serverless function
+  ([`src/worker.js`](src/worker.js)) makes the calls for you. It uses the token
+  for a few requests to Riot, returns your store, and logs nothing. The only
+  thing it stores is one global number, the "shops checked" counter on the page
+  ([`migrations/`](migrations)). It has no accounts, no IPs and no history.
 - **Item names and pictures** come from the community API
   [valorant-api.com](https://valorant-api.com), fetched by your browser.
 - **Stay logged in is optional, and riskier.** It saves Riot's `ssid` session
@@ -77,10 +79,14 @@ containing `#access_token=a.b.c`.
 ```bash
 npx wrangler login
 npx wrangler pages project create <name> --production-branch main
+npx wrangler d1 create <name>          # for the shops-checked counter
+npx wrangler d1 migrations apply <name> --remote
 ```
 
-Set `name` in `wrangler.toml` to the same name, then run `npm run deploy`. It
-lands at `https://<name>.pages.dev`. Cloudflare's free plan is plenty for
+Set `name` in `wrangler.toml` and the `[[d1_databases]]` entry to your own
+names and database id, then run `npm run deploy`. It lands at
+`https://<name>.pages.dev`. The counter is optional: without the database, the
+site works the same and just hides it. Cloudflare's free plan is plenty for
 personal use.
 
 ## License

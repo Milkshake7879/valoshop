@@ -5,11 +5,12 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import worker from "../src/worker.js";
-import { fakeRiot } from "./fixtures.js";
+import { fakeRiot, fakeDb } from "./fixtures.js";
 
 const PUBLIC = new URL("../public/", import.meta.url).pathname;
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
 const PORT = Number(process.env.PORT ?? 8787);
+const DB = fakeDb(12345);
 
 globalThis.fetch = fakeRiot({ realFetch: globalThis.fetch });
 
@@ -44,7 +45,7 @@ createServer(async (req, res) => {
     headers: req.headers,
     body: chunks.length ? Buffer.concat(chunks) : undefined,
   });
-  const response = await worker.fetch(request, { ASSETS });
+  const response = await worker.fetch(request, { ASSETS, DB });
   res.writeHead(response.status, Object.fromEntries(response.headers));
   res.end(Buffer.from(await response.arrayBuffer()));
 }).listen(PORT, () => console.log(`Mock shop on http://localhost:${PORT}`));

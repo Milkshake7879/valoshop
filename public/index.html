@@ -38,6 +38,10 @@
       <p class="kicker">Valorant store</p>
       <h1 class="hero">Your shop,<br>anywhere.</h1>
       <p class="lede">Daily offers, accessories and the Night Market, checked from any device.</p>
+      <p class="counter" id="counter" hidden>
+        <span class="live-dot" aria-hidden="true"></span>
+        <strong class="counter-n" data-count></strong> shops checked so far
+      </p>
 
       <div class="wizard" id="wizard" data-step="1">
         <ol class="progress" aria-label="Steps">
@@ -136,6 +140,10 @@
         </header>
         <div class="grid grid-bundles" id="bundles"></div>
       </section>
+
+      <p class="shop-number" id="shop-number" hidden>
+        You just checked shop <strong>#<span data-count></span></strong> on Shop Check
+      </p>
     </div>
   </main>
 

@@ -53,6 +53,20 @@ export const STOREFRONT = {
   },
 };
 
+// Just enough of D1 for the counter: UPDATE … RETURNING bumps, SELECT reads.
+export function fakeDb(start = 0) {
+  const db = {
+    n: start,
+    prepare: (sql) => ({
+      first: async () => {
+        if (sql.startsWith("UPDATE")) db.n += 1;
+        return db.n;
+      },
+    }),
+  };
+  return db;
+}
+
 export const GOOD_SSID = "good-session-cookie-value.abc123";
 export const ROTATED_SSID = "rotated-session-cookie-value.def456";
 

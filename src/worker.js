@@ -1,9 +1,10 @@
 // Valorant shop checker — the backend half (served as a Pages Function).
 //
 // The browser cannot call Riot's store servers itself (they send no CORS
-// headers), so this Worker does it on the browser's behalf. It is stateless:
-// the credentials arrive in the request body, are used for a handful of
-// upstream calls, and are never stored or logged. Item names and images are
+// headers), so this Worker does it on the browser's behalf. The credentials
+// arrive in the request body, are used for a handful of upstream calls, and
+// are never stored or logged. The only thing kept is one global number, the
+// count of shops checked, in a D1 table (env.DB). Item names and images are
 // resolved in the browser from valorant-api.com, which keeps this Worker's CPU
 // time tiny.
 //
@@ -49,14 +50,18 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/store") {
       if (request.method !== "POST") return json({ error: "Use POST." }, 405);
-      return handleStore(request);
+      return handleStore(request, env);
+    }
+    if (url.pathname === "/api/stats") {
+      if (request.method !== "GET") return json({ error: "Use GET." }, 405);
+      return json({ shopsChecked: await readCount(env) }, 200, "public, max-age=15");
     }
     if (url.pathname.startsWith("/api/")) return json({ error: "Not found." }, 404);
     return env.ASSETS.fetch(request);
   },
 };
 
-async function handleStore(request) {
+async function handleStore(request, env) {
   let body;
   try {
     body = await request.json();
@@ -77,12 +82,37 @@ async function handleStore(request) {
     if (ssid != null) {
       const login = await reauth(ssid);
       const store = await fetchStore(login.accessToken, login.idToken, region);
-      return json({ ...store, ssid: login.ssid });
+      return json({ ...store, ssid: login.ssid, shopsChecked: await bumpCount(env) });
     }
-    return json(await fetchStore(accessToken, idToken, region));
+    const store = await fetchStore(accessToken, idToken, region);
+    return json({ ...store, shopsChecked: await bumpCount(env) });
   } catch (err) {
     if (err instanceof HttpError) return json({ error: err.message, code: err.code }, err.status);
     return json({ error: "Couldn't reach Riot. Try again in a moment." }, 502);
+  }
+}
+
+// --- The global counter -------------------------------------------------------
+//
+// Bumped once per store actually delivered. A counter failure must never cost
+// anyone their store, so both helpers swallow errors and return null, as they
+// do when there's no database at all (tests, local mock).
+
+async function bumpCount(env) {
+  if (!env?.DB) return null;
+  try {
+    return await env.DB.prepare("UPDATE counters SET n = n + 1 WHERE name = 'shops' RETURNING n").first("n");
+  } catch {
+    return null;
+  }
+}
+
+async function readCount(env) {
+  if (!env?.DB) return null;
+  try {
+    return await env.DB.prepare("SELECT n FROM counters WHERE name = 'shops'").first("n");
+  } catch {
+    return null;
   }
 }
 
@@ -251,9 +281,9 @@ function isCookieValue(value) {
   return typeof value === "string" && value.length < 8192 && COOKIE_VALUE.test(value);
 }
 
-function json(data, status = 200) {
+function json(data, status = 200, cache = "no-store") {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    headers: { "Content-Type": "application/json", "Cache-Control": cache },
   });
 }

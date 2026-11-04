@@ -194,6 +194,52 @@ main { max-width: 1160px; margin: 0 auto; padding: 0 16px 64px; }
 
 .lede { margin: 16px 0 36px; color: var(--muted); font-size: 17px; max-width: 30em; }
 
+.counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: -20px 0 32px;
+  padding: 8px 14px 8px 12px;
+  border: 1px solid var(--line);
+  background: rgba(236, 232, 225, 0.03);
+  font: 600 14px/1 var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  animation: fade 0.6s var(--ease) both;
+}
+
+.counter-n {
+  color: var(--ink);
+  font-size: 17px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: live 2s ease-out infinite;
+}
+
+@keyframes live {
+  0% { box-shadow: 0 0 0 0 rgba(255, 70, 85, 0.6); }
+  70%, 100% { box-shadow: 0 0 0 8px rgba(255, 70, 85, 0); }
+}
+
+.shop-number {
+  margin: 48px 0 0;
+  text-align: center;
+  font: 600 15px/1 var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  animation: fade 0.8s 0.4s var(--ease) both;
+}
+.shop-number strong { color: var(--red); font-size: 18px; font-variant-numeric: tabular-nums; }
+
 .wizard { position: relative; }
 
 .progress {
